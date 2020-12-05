@@ -17,6 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -123,8 +124,8 @@ public class MainMenu extends Application {
 
         for(int i = 0; i < 8; i++){
             for(int j = 0; j < 8; j++) {
-                if(board.getPiece(j,i) != null){
-                    if(board.getPiece(j,i).getColor() == aiColor){
+                if(tileBoard.getPiece(j,i) != null){
+                    if(tileBoard.getPiece(j,i).getColor() == aiColor){
                         System.out.println("here");
                         ArrayList<Tile> posMoves = possibleMoves(tileBoard.getTile(j,i), aiColor);
                         System.out.println(posMoves.size());
@@ -159,6 +160,8 @@ public class MainMenu extends Application {
             System.out.println("Moved from: " + x + "," + y);
             System.out.println("Moved to: " + endMove.returnX() + "," + endMove.returnY());
             a.relocate(10 + 60* endMove.returnX(), 10 + 60 * endMove.returnY());
+            a.setX(endMove.returnX());
+            a.setY(endMove.returnY());
             makeOffMove(x,y,endMove.returnX(),endMove.returnY());
 
             System.out.println("CCCCCCCCCCCCCCCC");
@@ -235,7 +238,7 @@ public class MainMenu extends Application {
                         System.out.println("test4");
                         // move 2 places to left
                         if ((currX - 2 >= 0) && (currY + 2 <= 7)) {
-                            if (tileBoard.hasPiece(currX - 2,currY + 2) == false && tileBoard.hasPiece(currX - 1,currY + 1) == true && tileBoard.getPiece(currX - 1,currY + 1).getColor() != Color.BLUE) {
+                            if (tileBoard.hasPiece(currX - 2,currY + 2) == false && tileBoard.hasPiece(currX - 1,currY + 1) == true && tileBoard.getPiece(currX - 1,currY + 1).getColor() != Color.RED) {
                                 System.out.println("test5");
                                 posMoves.add(tileBoard.getTile(currX - 2,currY + 2));
                                 flag = 1;
@@ -254,7 +257,7 @@ public class MainMenu extends Application {
                             // Move 2 places to right
                             if ((currX + 2 <= 7) && (currY + 2 <= 7)) {
                                 if (tileBoard.hasPiece(currX + 2,currY + 2) == false &&
-                                        tileBoard.hasPiece(currX + 1,currY + 1) == true && tileBoard.getPiece(currX + 1,currY + 1).getColor() == playerColor){
+                                        tileBoard.hasPiece(currX + 1,currY + 1) == true && tileBoard.getPiece(currX + 1,currY + 1).getColor() != Color.RED){
                                     System.out.println("test7");
                                     posMoves.add(tileBoard.getTile(currX + 2,currY + 2));
                                     flag = 1;
@@ -295,7 +298,7 @@ public class MainMenu extends Application {
                             // Move 2 places to right
                             if ((currX - 2 >= 0) && (currY - 2 >= 0)) {
                                 if (tileBoard.hasPiece(currX - 2, currY - 2) == false &&
-                                        tileBoard.hasPiece(currX - 1, currY - 1) == true && tileBoard.getPiece(currX - 1, currY - 1).getColor() == playerColor) {
+                                        tileBoard.hasPiece(currX - 1, currY - 1) == true && tileBoard.getPiece(currX - 1, currY - 1).getColor() != Color.BLUE) {
                                     posMoves.add(tileBoard.getTile(currX - 2, currY - 2));
                                     flag = 1;
                                 }
@@ -305,8 +308,8 @@ public class MainMenu extends Application {
                 }
             }
         }
+        System.out.println("current X: " + currX + ", current Y: " + currY);
         System.out.println("posMoves: " + posMoves.size());
-        System.out.println("sup bitch");
         return posMoves;
     }
 
@@ -400,6 +403,8 @@ public class MainMenu extends Application {
     public void makeOffMove(int sX, int sY, int eX, int eY){
         tileBoard.setPiece(eX, eY, tileBoard.getPiece(sX,sY));
         tileBoard.setPiece(sX, sY, null);
+        board.setPiece(board.getPiece(sX,sY), eX, eY);
+        board.setPiece(null, sX, sY);
     }
 
     public int evaluate(){
@@ -459,8 +464,8 @@ public class MainMenu extends Application {
     }*/
 
     public void setupBoard(){
-        playerColor = Color.RED;
-        aiColor = Color.BLUE;
+        playerColor = Color.BLUE;
+        aiColor = Color.RED;
         // a keeps track of white or red tile
         int a = 0;
         // b keeps track of when the current row ends so that the next colour is opposite of first in row above
@@ -540,12 +545,17 @@ public class MainMenu extends Application {
                     newX = newX / 60;
                     newY = newY / 60;
 
-                    if(piece.getColor() != Color.BLUE){
-                        piece.relocate(10 + (newX * 60), 10 + (newY * 60));
-                        makeOffMove(oldX, oldY, newX, newY);
+                    if(piece.getColor() == playerColor){
+                        if(validMove(oldX, oldY, newX, newY) == true){
+                            piece.relocate(10 + (newX * 60), 10 + (newY * 60));
+                            piece.setX(newX);
+                            piece.setY(newY);
+                            makeOffMove(oldX, oldY, newX, newY);
+                            turn = 1;
+                        }
+
                     }
 
-                    turn = 1;
                 }
             }
         });
@@ -553,6 +563,16 @@ public class MainMenu extends Application {
         return piece;
     }
 
+    public Boolean validMove(int oldX, int oldY, int newX, int newY){
+        boolean valid = false;
+        ArrayList<Tile> validMoves = possibleMoves(tileBoard.getTile(oldX,oldY),playerColor);
+        for(int i = 0; i < validMoves.size(); i++){
+            if(validMoves.get(i) == tileBoard.getTile(newX, newY)){
+                valid = true;
+            }
+        }
+        return valid;
+    }
 
     public Scene createScene(){
         Pane scene = new Pane();
