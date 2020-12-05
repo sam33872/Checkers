@@ -8,6 +8,8 @@ public class Tile extends Rectangle {
     private boolean leaf;
     private int x;
     private int y;
+    private boolean hasAPieceTest;
+    private GamePiece oldPiece;
 
     public Tile(Color color, int x, int y){
         this.x = x;
@@ -18,6 +20,8 @@ public class Tile extends Rectangle {
         setHeight(60);
         setFill(color);
         piece = null;
+        oldPiece = null;
+        hasAPieceTest = false;
         if((x == 0) || (x == 7) ||
                 (y == 0) || (y == 7)){
             leaf = true;
@@ -34,7 +38,17 @@ public class Tile extends Rectangle {
     }
 
     public void setPiece(GamePiece piece){
+        this.oldPiece = this.piece;
         this.piece = piece;
+        if(piece == null){
+            hasAPieceTest = false;
+        }else{
+            hasAPieceTest = true;
+        }
+    }
+
+    public void setToOldPiece() {
+        this.piece = oldPiece;
     }
 
     public GamePiece getPiece() {
