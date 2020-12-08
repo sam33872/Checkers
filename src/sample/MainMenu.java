@@ -26,7 +26,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class MainMenu extends Application {
-    private PieceBoard board;
+    //private PieceBoard board;
     private TileBoard tileBoard;
 
     private Group grid;
@@ -34,11 +34,16 @@ public class MainMenu extends Application {
     private int turn;
     private int flag;
 
+
+    private int make;
+    private int unmake;
+    private int whatever;
+
     private Color playerColor;
     private Color aiColor;
 
     public MainMenu(){
-        board = new PieceBoard();
+        //board = new PieceBoard();
         tileBoard = new TileBoard();
         grid = new Group();
         pieces = new Group();
@@ -111,30 +116,36 @@ public class MainMenu extends Application {
             }
             System.out.println("");
         }
+
+        make = 0;
+        unmake = 0;
+
         // run ai turn
         int bestVal = -10000000;
         Tile bestMove = null;
         Tile endMove = null;
         flag = 0;
+        whatever = 6890;
 
         int x = 0;
         int y = 0;
         int alpha = (int) Double.NEGATIVE_INFINITY;
         int beta = (int) Double.POSITIVE_INFINITY;
 
+        System.out.println("Start ai check");
         for(int i = 0; i < 8; i++){
             for(int j = 0; j < 8; j++) {
                 if(tileBoard.getPiece(j,i) != null){
                     if(tileBoard.getPiece(j,i).getColor() == aiColor){
-                        System.out.println("here");
+                        //System.out.println("tile: " + j + "," + i);
                         ArrayList<Tile> posMoves = possibleMoves(tileBoard.getTile(j,i), aiColor);
-                        System.out.println(posMoves.size());
+                        //System.out.println(posMoves.size());
                         for(int k = 0; k < posMoves.size(); k++){
-                            System.out.println("about to do1");
+                            make++;
                             makeMove(tileBoard.getTile(j,i), posMoves.get(k), aiColor);
-                            int test = minimax(posMoves.get(k),d,alpha,beta,aiColor,playerColor,"MIN");
-                            System.out.println("about to undo1");
-                            // herrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+                            int test = minimax(posMoves.get(k),d,alpha,beta,"MIN");
+                            System.out.println("unmakeMove");;
+                            unmake++;
                             unmakeMove(tileBoard.getTile(j,i), posMoves.get(k), aiColor);
                             if(test > bestVal){
                                 bestVal = test;
@@ -150,7 +161,7 @@ public class MainMenu extends Application {
         }
 
         if(endMove != null){
-            GamePiece a = null;
+            /*GamePiece a = null;
             for(int i = 0; i < pieces.getChildren().size(); i++){
                 GamePiece g = (GamePiece) pieces.getChildren().get(i);
                 if(g.getX() == x && g.getY() == y){
@@ -161,54 +172,102 @@ public class MainMenu extends Application {
             System.out.println("Moved to: " + endMove.returnX() + "," + endMove.returnY());
             a.relocate(10 + 60* endMove.returnX(), 10 + 60 * endMove.returnY());
             a.setX(endMove.returnX());
-            a.setY(endMove.returnY());
-            makeOffMove(x,y,endMove.returnX(),endMove.returnY());
+            a.setY(endMove.returnY());*/
+            makeOfficialMove(x,y,endMove.returnX(),endMove.returnY());
 
             System.out.println("CCCCCCCCCCCCCCCC");
             for(int q = 0; q < 8; q++){
                 for(int r = 0; r < 8; r++) {
-                    System.out.print(tileBoard.hasPiece(r,q));
+                   if(tileBoard.hasPiece(r,q)){
+                       System.out.print(tileBoard.getPiece(r,q).getColor().hashCode());
+                   }else {
+                       System.out.print("false");
+                   }
+                   System.out.print(",");
+                }
+                System.out.println("");
+            }
+
+            System.out.println("Make: " + make);
+            System.out.println("Unmake: " + unmake);
+        }
+    }
+
+    public int minimax(Tile e, int d, int alpha, int beta, String maximise){
+        if(whatever == 7000){
+            System.out.println("CCCCCCCCCCCCCCCC");
+            for(int q = 0; q < 8; q++){
+                for(int r = 0; r < 8; r++) {
+                    if(tileBoard.hasPiece(r,q)){
+                        System.out.print(tileBoard.getPiece(r,q).getColor().hashCode());
+                    }else {
+                        System.out.print("false");
+                    }
                     System.out.print(",");
                 }
                 System.out.println("");
             }
+            whatever = 0;
+        }else{
+            whatever++;
         }
-    }
-
-    public int minimax(Tile e, int d, int alpha, int beta, Color current, Color opponent, String maximise){
-        System.out.println("Minimax called");
+        //System.out.println("Minimax called");
         if((d == 0) || (e.isLeaf() == true)){
-            return evaluate();
+            if(maximise == "MAX"){
+                return evaluate(Color.BLUE);
+            }
+            else{
+                return evaluate(Color.RED);
+            }
         }
         if(maximise == "MAX"){
-            int bestValue = -100;
-            ArrayList<Tile> posMoves = possibleMoves(e,aiColor);
-            for(int i = 0; i < posMoves.size(); i++){
-                System.out.println("about to do2");
-                makeMove(e,posMoves.get(i),aiColor);
-                bestValue = max(bestValue, minimax(posMoves.get(i),d-1, alpha, beta,aiColor,playerColor, "MIN"));
-                System.out.println("about to undo2");
-                // geeeeeeeeeeeeeeeeeeeeeeee
-                unmakeMove(e,posMoves.get(i),aiColor);
-                alpha = max(alpha, bestValue);
-                if(alpha >= beta){
-                    break;
+            int bestValue = alpha;
+            //System.out.println("Start ai check");
+            for(int i = 0; i < 8; i++){
+                for(int j = 0; j < 8; j++) {
+                    if(tileBoard.getPiece(j,i) != null){
+                        if(tileBoard.getPiece(j,i).getColor() == aiColor){
+                            //System.out.println("tile: " + j + "," + i);
+                            ArrayList<Tile> posMoves = possibleMoves(tileBoard.getTile(j,i), aiColor);
+                            for(int k = 0; k < posMoves.size(); k++){
+                                make++;
+                                makeMove(tileBoard.getTile(j,i), posMoves.get(k), aiColor);
+                                bestValue = max(bestValue, minimax(posMoves.get(k),d-1, alpha, beta, "MIN"));
+                                unmake++;
+                                unmakeMove(tileBoard.getTile(j,i), posMoves.get(k), aiColor);
+                                alpha = max(alpha, bestValue);
+                                if(alpha >= beta){
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
             }
             return bestValue;
         }
         else{
-            int bestValue = 100;
-            ArrayList<Tile> posMoves = possibleMoves(e,playerColor);
-            for(int i = 0; i < posMoves.size(); i++){
-                System.out.println("about to do3");
-                makeMove(e,posMoves.get(i), playerColor);
-                bestValue = max(bestValue, minimax(posMoves.get(i),d-1, alpha, beta,playerColor,aiColor, "MAX"));
-                System.out.println("about to undo3");
-                unmakeMove(e,posMoves.get(i), playerColor);
-                beta = min(beta, bestValue);
-                if(alpha >= beta){
-                    break;
+            int bestValue = beta;
+            //System.out.println("Start player check");
+            for(int i = 0; i < 8; i++){
+                for(int j = 0; j < 8; j++) {
+                    if(tileBoard.getPiece(j,i) != null){
+                        if(tileBoard.getPiece(j,i).getColor() == playerColor){
+                            //System.out.println("tile: " + j + "," + i);
+                            ArrayList<Tile> posMoves = possibleMoves(tileBoard.getTile(j,i), playerColor);
+                            for(int k = 0; k < posMoves.size(); k++){
+                                make++;
+                                makeMove(tileBoard.getTile(j,i), posMoves.get(k), playerColor);
+                                bestValue = max(bestValue, minimax(posMoves.get(k),d-1, alpha, beta, "MAX"));
+                                unmake++;
+                                unmakeMove(tileBoard.getTile(j,i), posMoves.get(k), playerColor);
+                                beta = min(beta, bestValue);
+                                if(alpha >= beta){
+                                    break;
+                                }
+                             }
+                        }
+                    }
                 }
             }
             return bestValue;
@@ -216,33 +275,28 @@ public class MainMenu extends Application {
     }
 
     public ArrayList<Tile> possibleMoves(Tile t, Color c){
+        flag = 0;
         ArrayList<Tile> posMoves = new ArrayList<>();
         int currX = t.returnX();
         int currY = t.returnY();
         if(c == Color.RED){
-            System.out.println("test1");
             if (tileBoard.hasPiece(currX,currY) == true){
                 if(tileBoard.getPiece(currX,currY).getKing() == true){
                     // IMPLEMENT IF KING
                 }
                 else {
-                    System.out.println("test2");
                     // move 1 place to left
                     if ((currX - 1 >= 0) && (currY + 1 <= 7)) {
                         if (tileBoard.hasPiece(currX - 1,currY + 1) == false) {
-                            System.out.println("test3");
                             posMoves.add(tileBoard.getTile(currX - 1,currY + 1));
 
                         }
                     } else {
-                        System.out.println("test4");
                         // move 2 places to left
                         if ((currX - 2 >= 0) && (currY + 2 <= 7)) {
-                            if (tileBoard.hasPiece(currX - 2,currY + 2) == false && tileBoard.hasPiece(currX - 1,currY + 1) == true && tileBoard.getPiece(currX - 1,currY + 1).getColor() != Color.RED) {
-                                System.out.println("test5");
+                            if (tileBoard.hasPiece(currX - 2,currY + 2) == false &&
+                                    tileBoard.hasPiece(currX - 1,currY + 1) == true && tileBoard.getPiece(currX - 1,currY + 1).getColor() != Color.RED) {
                                 posMoves.add(tileBoard.getTile(currX - 2,currY + 2));
-                                flag = 1;
-
                             }
                         }
                     }
@@ -250,7 +304,6 @@ public class MainMenu extends Application {
                     // Move 1 place to right
                     if ((currX + 1 <= 7) && (currY + 1 <= 7)) {
                         if (tileBoard.hasPiece(currX + 1,currY + 1) == false) {
-                            System.out.println("test6");
                             posMoves.add(tileBoard.getTile(currX + 1,currY + 1));
                         }
                         else {
@@ -258,9 +311,7 @@ public class MainMenu extends Application {
                             if ((currX + 2 <= 7) && (currY + 2 <= 7)) {
                                 if (tileBoard.hasPiece(currX + 2,currY + 2) == false &&
                                         tileBoard.hasPiece(currX + 1,currY + 1) == true && tileBoard.getPiece(currX + 1,currY + 1).getColor() != Color.RED){
-                                    System.out.println("test7");
                                     posMoves.add(tileBoard.getTile(currX + 2,currY + 2));
-                                    flag = 1;
                                 }
                             }
                         }
@@ -282,10 +333,10 @@ public class MainMenu extends Application {
                     } else {
                         // move 2 places to left
                         if ((currX + 2 <= 7) && (currY - 2 >= 0)) {
-                            if (tileBoard.hasPiece(currX + 2, currY - 2) == false && tileBoard.hasPiece(currX + 1, currY - 1) == true && tileBoard.getPiece(currX + 1, currY - 1).getColor() != Color.BLUE) {
+                            if (tileBoard.hasPiece(currX + 2, currY - 2) == false &&
+                                    tileBoard.hasPiece(currX + 1, currY - 1) == true &&
+                                        tileBoard.getPiece(currX + 1, currY - 1).getColor() == Color.RED) {
                                 posMoves.add(tileBoard.getTile(currX + 2, currY - 2));
-                                flag = 1;
-
                             }
                         }
                     }
@@ -300,7 +351,6 @@ public class MainMenu extends Application {
                                 if (tileBoard.hasPiece(currX - 2, currY - 2) == false &&
                                         tileBoard.hasPiece(currX - 1, currY - 1) == true && tileBoard.getPiece(currX - 1, currY - 1).getColor() != Color.BLUE) {
                                     posMoves.add(tileBoard.getTile(currX - 2, currY - 2));
-                                    flag = 1;
                                 }
                             }
                         }
@@ -308,8 +358,8 @@ public class MainMenu extends Application {
                 }
             }
         }
-        System.out.println("current X: " + currX + ", current Y: " + currY);
-        System.out.println("posMoves: " + posMoves.size());
+        //System.out.println("current X: " + currX + ", current Y: " + currY);
+        //System.out.println("posMoves: " + posMoves.size());
         return posMoves;
     }
 
@@ -320,20 +370,19 @@ public class MainMenu extends Application {
         int endY = end.returnY();
         if(c == Color.BLUE){
             if(startX - endX == -2){
-                System.out.println("done 1");
                 tileBoard.setPiece(endX,endY,tileBoard.getPiece(startX,startY));
-                tileBoard.setPiece(startX,startY,null);
-                tileBoard.setPiece(startX+1,startY-1,null);
+                tileBoard.setPiece(startX,startY, null);
+                tileBoard.getTile(startX+1, startY-1).addToStack(tileBoard.getPiece(startX + 1, startY-1));
+                tileBoard.setPiece(startX+1, startY-1, null);
             }
             else if(startX - endX == 2){
-                System.out.println("done 2");
                 tileBoard.setPiece(endX,endY,tileBoard.getPiece(startX,startY));
                 tileBoard.setPiece(startX,startY,null);
+                tileBoard.getTile(startX-1, startY-1).addToStack(tileBoard.getPiece(startX - 1, startY-1));
                 tileBoard.setPiece(startX-1,startY-1,null);
             }
 
             if((startX - endX == -1) || (startX - endX == 1)){
-                System.out.println("done 3");
                 tileBoard.setPiece(endX,endY,tileBoard.getPiece(startX,startY));
                 tileBoard.setPiece(startX,startY,null);
             }
@@ -341,12 +390,15 @@ public class MainMenu extends Application {
         else if(c == Color.RED){
             if(startX - endX == 2){
                 tileBoard.setPiece(endX, endY,tileBoard.getPiece(startX, startY));
-                tileBoard.setPiece(startX, startY, null);
+                tileBoard.setPiece(startX,startY,null);
+                tileBoard.getTile(startX-1, startY+1).addToStack(tileBoard.getPiece(startX - 1, startY+1));
                 tileBoard.setPiece(startX-1, startY+1, null);
+
             }
             else if(startX - endX == -2){
                 tileBoard.setPiece(endX, endY,tileBoard.getPiece(startX, startY));
-                tileBoard.setPiece(startX, startY, null);
+                tileBoard.setPiece(startX,startY,null);
+                tileBoard.getTile(startX+1, startY+1).addToStack(tileBoard.getPiece(startX + 1, startY+1));
                 tileBoard.setPiece(startX+1, startY+1, null);
             }
             if((startX - endX == -1) || (startX - endX == 1)){
@@ -365,19 +417,16 @@ public class MainMenu extends Application {
 
         if(c == Color.BLUE){
             if(endX - startX == 2){
-                System.out.println("undone 1");
                 tileBoard.setPiece(startX,startY,tileBoard.getPiece(endX,endY));
                 tileBoard.setPiece(endX,endY,null);
-                tileBoard.getTile(endX - 1, endY + 1).setToOldPiece();
+                tileBoard.getTile(startX+1,startY-1).setToOldPiece();
             }
             else if(endX - startX == -2){
-                System.out.println("undone 2");
                 tileBoard.setPiece(startX,startY,tileBoard.getPiece(endX,endY));
                 tileBoard.setPiece(endX,endY,null);
-                tileBoard.getTile(endX + 1, endY + 1).setToOldPiece();
+                tileBoard.getTile(startX-1,startY-1).setToOldPiece();
             }
             if((endX - startX == -1) || (endX - startX == 1)){
-                System.out.println("undone 3");
                 tileBoard.setPiece(startX,startY,tileBoard.getPiece(endX,endY));
                 tileBoard.setPiece(endX,endY,null);
             }
@@ -386,12 +435,12 @@ public class MainMenu extends Application {
             if(endX - startX == -2){
                 tileBoard.setPiece(startX,startY,tileBoard.getPiece(endX,endY));
                 tileBoard.setPiece(endX,endY,null);
-                tileBoard.getTile(endX + 1, endY - 1).setToOldPiece();
+                tileBoard.getTile(startX-1, startY+1).setToOldPiece();
             }
             else if(endX - startX == 2){
                 tileBoard.setPiece(startX,startY,tileBoard.getPiece(endX,endY));
                 tileBoard.setPiece(endX,endY,null);
-                tileBoard.getTile(endX - 1, endY - 1).setToOldPiece();
+                tileBoard.getTile(startX+1, startY+1).setToOldPiece();
             }
             if((endX - startX == 1) || (endX - startX == -1)){
                 tileBoard.setPiece(startX,startY,tileBoard.getPiece(endX,endY));
@@ -400,15 +449,58 @@ public class MainMenu extends Application {
         }
     }
 
-    public void makeOffMove(int sX, int sY, int eX, int eY){
+    public void makeOfficialMove(int sX, int sY, int eX, int eY){
+        GamePiece a = null;
+        int b = 0;
+        int findX = 0;
+        int findY = 0;
+        int take = 0;
+
+        if(sX - eX == 2 && sY - eY == 2){
+            findX = sX - 1;
+            findY = sY - 1;
+            take = 1;
+        }
+        else if(sX - eX == 2 && sY - eY == -2){
+            findX = sX - 1;
+            findY = sY + 1;
+            take = 1;
+        }
+        else if(sX - eX == -2 && sY - eY == 2){
+            findX = sX + 1;
+            findY = sY - 1;
+            take = 1;
+        }
+        else if(sX - eX == -2 && sY - eY == -2){
+            findX = sX + 1;
+            findY = sY + 1;
+            take = 1;
+        }
+
+        for(int i = 0; i < pieces.getChildren().size(); i++){
+            GamePiece g = (GamePiece) pieces.getChildren().get(i);
+            if(g.getX() == sX && g.getY() == sY){
+                a = g;
+            }
+            if(g.getX() == findX && g.getY() == findY){
+                b = i;
+            }
+        }
+
+        a.relocate(10 + 60* eX, 10 + 60 * eY);
+        a.setX(eX);
+        a.setY(eY);
+        System.out.println(pieces.getChildren().size());
+        if(take == 1){
+            tileBoard.setPiece(findX, findY, null);
+            pieces.getChildren().remove(b);
+        }
+        System.out.println(pieces.getChildren().size());
         tileBoard.setPiece(eX, eY, tileBoard.getPiece(sX,sY));
         tileBoard.setPiece(sX, sY, null);
-        board.setPiece(board.getPiece(sX,sY), eX, eY);
-        board.setPiece(null, sX, sY);
     }
 
-    public int evaluate(){
-        Color c = Color.BLUE;
+    public int evaluate(Color c){
         int value = 0;
         // red player
         if(c == Color.RED){
@@ -466,6 +558,7 @@ public class MainMenu extends Application {
     public void setupBoard(){
         playerColor = Color.BLUE;
         aiColor = Color.RED;
+        System.out.println("111111111");
         // a keeps track of white or red tile
         int a = 0;
         // b keeps track of when the current row ends so that the next colour is opposite of first in row above
@@ -494,25 +587,19 @@ public class MainMenu extends Application {
                         ((i == 1) && (j % 2 == 0)) ||
                             ((i == 2) && (j % 2 != 0))){
                     GamePiece piece = createPiece(Color.RED,j,i);
-                    piece.setReference("R" + r);
-                    r++;
-                    board.setPiece(piece,j,i);
+                    //board.setPiece(piece,j,i);
                     tileBoard.setPiece(j,i,piece);
                     pieces.getChildren().add(piece);
                 }
                 if((i == 5 || i == 7) && (j == 0 || j == 2 || j == 4 || j == 6)){
                     GamePiece piece = createPiece(Color.BLUE,j,i);
-                    piece.setReference("B" + r);
-                    r++;
-                    board.setPiece(piece,j,i);
+                    //board.setPiece(piece,j,i);
                     tileBoard.setPiece(j,i,piece);
                     pieces.getChildren().add(piece);
                 }
                 else if((i == 6) && (j == 1 || j == 3 || j == 5 || j == 7)){
                     GamePiece piece = createPiece(Color.BLUE,j,i);
-                    piece.setReference("B" + r);
-                    r++;
-                    board.setPiece(piece,j,i);
+                    //board.setPiece(piece,j,i);
                     tileBoard.setPiece(j,i,piece);
                     pieces.getChildren().add(piece);
                 }
@@ -527,6 +614,7 @@ public class MainMenu extends Application {
                 }
             }
         }
+        System.out.println("999999999999");
     }
 
     public GamePiece createPiece(Color color, int x, int y){
@@ -547,13 +635,12 @@ public class MainMenu extends Application {
 
                     if(piece.getColor() == playerColor){
                         if(validMove(oldX, oldY, newX, newY) == true){
-                            piece.relocate(10 + (newX * 60), 10 + (newY * 60));
-                            piece.setX(newX);
-                            piece.setY(newY);
-                            makeOffMove(oldX, oldY, newX, newY);
+                            //piece.relocate(10 + (newX * 60), 10 + (newY * 60));
+                            //piece.setX(newX);
+                            //piece.setY(newY);
+                            makeOfficialMove(oldX, oldY, newX, newY);
                             turn = 1;
                         }
-
                     }
 
                 }
@@ -580,18 +667,18 @@ public class MainMenu extends Application {
         scene.getChildren().addAll(grid, pieces);
 
         setupBoard();
-
         Button endTurn = new Button("End Turn");
         endTurn.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                runAITurn(3);
+                System.out.println("222222222222222");
+                runAITurn(1);
                 turn = 0;
             }
         });
-
         VBox vbox = new VBox(scene, endTurn);
         Scene gameScene = new Scene(vbox);
+        System.out.println("3333333333333");
         return gameScene;
     }
 

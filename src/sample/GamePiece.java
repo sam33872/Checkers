@@ -8,7 +8,7 @@ import javafx.scene.shape.Circle;
 public class GamePiece extends Circle {
     private String reference;
     private Boolean king;
-    private Color color;
+    private final Color color;
     private int x;
     private int y;
 
@@ -36,10 +36,6 @@ public class GamePiece extends Circle {
 
     public Boolean getKing() {
         return king;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
     }
 
     public Color getColor() {

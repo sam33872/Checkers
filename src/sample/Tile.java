@@ -3,13 +3,15 @@ package sample;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 
+import java.util.Stack;
+
 public class Tile extends Rectangle {
     private GamePiece piece;
     private boolean leaf;
     private int x;
     private int y;
     private boolean hasAPieceTest;
-    private GamePiece oldPiece;
+    private Stack<GamePiece> oldPiece;
 
     public Tile(Color color, int x, int y){
         this.x = x;
@@ -20,7 +22,7 @@ public class Tile extends Rectangle {
         setHeight(60);
         setFill(color);
         piece = null;
-        oldPiece = null;
+        oldPiece = new Stack<GamePiece>();
         hasAPieceTest = false;
         if((x == 0) || (x == 7) ||
                 (y == 0) || (y == 7)){
@@ -38,7 +40,6 @@ public class Tile extends Rectangle {
     }
 
     public void setPiece(GamePiece piece){
-        this.oldPiece = this.piece;
         this.piece = piece;
         if(piece == null){
             hasAPieceTest = false;
@@ -47,8 +48,12 @@ public class Tile extends Rectangle {
         }
     }
 
+    public void addToStack(GamePiece piece){
+        oldPiece.add(piece);
+    }
+
     public void setToOldPiece() {
-        this.piece = oldPiece;
+        this.piece = oldPiece.pop();
     }
 
     public GamePiece getPiece() {
