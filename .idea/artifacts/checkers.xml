@@ -1,0 +1,6 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" build-on-make="true" name="checkers">
+    <output-path>$PROJECT_DIR$/out/artifacts/checkers</output-path>
+    <root id="root" />
+  </artifact>
+</component>
